@@ -25,7 +25,7 @@ start_link() ->
     gen_server:start_link({local, ?SERVER}, ?MODULE, [], []).
 
 set(Key, Value) ->
-    gen_server:cast({set, Key, Value, infinity}).
+    gen_server:cast(?SERVER,{set, Key, Value, infinity}).
 
 set(Key, _Value, 0) -> delete(Key);
 
@@ -41,7 +41,7 @@ lookup(Key, Default) ->
         {error, missing} ->
             Default
     end.
-    
+
 delete(Key) ->
     gen_server:cast(?SERVER, {delete, Key}),
     ok.
@@ -116,7 +116,7 @@ clean_expired(Table, Heap, CurrentTime) ->
 
             % Grab the key
             case ets:lookup(Table, Key) of
-                % We need to check that the Expiration date hasn't been updated 
+                % We need to check that the Expiration date hasn't been updated
                 % to a later time.
                 [{Key, _Value, RealExpires}] when RealExpires =< CurrentTime ->
                     ets:delete(Table, Key);
