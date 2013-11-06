@@ -4,7 +4,6 @@
 
 -include_lib("eunit/include/eunit.hrl").
 
-
 %% =============================================================================
 simple_cache_test_() ->
     {setup,

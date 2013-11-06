@@ -5,7 +5,9 @@
 -define(SERVER,      ?MODULE).
 -define(ETS_OPTIONS, [{read_concurrency, true},
                       {write_concurrency, true},
-                      named_table]).
+                      named_table,
+                      protected
+                     ]).
 
 -record(state, {table}).
 
@@ -34,26 +36,34 @@
 %%=============================================================================
 %% API Function Definitions
 %%=============================================================================
+-spec start_link() -> 'ignore' | {'error',_} | {'ok',pid()}.
 start_link() ->
     gen_server:start_link({local, ?SERVER}, ?MODULE, [], []).
 
+-spec info() -> list().
 info() ->
     gen_server:call(?MODULE, info).
 
+-spec set(any(), any()) -> 'ok'.
 set(Key, Value) ->
     gen_server:cast(?SERVER, {set, Key, Value, infinity}).
 
+-spec sync_set(any(), any()) -> any().
 sync_set(Key, Value) ->
     gen_server:call(?SERVER, {set, Key, Value, infinity}).
 
+-spec set(any(), any(), simple_cache:expire()) -> 'ok'.
 set(Key, Value, Expires) ->
     gen_server:cast(?SERVER, {set, Key, Value, Expires}).
 
+-spec sync_set(any(), any(), simple_cache:expire()) -> any().
 sync_set(Key, Value, Expires) ->
     gen_server:call(?SERVER, {set, Key, Value, Expires}).
 
+-spec lookup(any()) -> {'error','not_found'} | {'ok',_}.
 lookup(Key) -> get_by_key(?SERVER, Key).
 
+-spec lookup(any(), any()) -> {'ok',_}.
 lookup(Key, Default) ->
     case lookup(Key) of
         {ok, Value} ->
@@ -62,14 +72,17 @@ lookup(Key, Default) ->
             {ok, Default}
     end.
 
+-spec flush(any()) -> 'ok'.
 flush(Key) ->
     gen_server:cast(?SERVER, {flush, Key}),
     ok.
 
+-spec sync_flush(any()) -> 'ok'.
 sync_flush(Key) ->
     gen_server:call(?SERVER, {flush, Key}),
     ok.
 
+-spec flush() -> 'ok'.
 flush() ->
     gen_server:cast(?SERVER, flush),
     ok.
