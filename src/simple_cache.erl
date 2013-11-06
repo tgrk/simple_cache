@@ -34,7 +34,7 @@ set(Key, Value) ->
 sync_set(Key, Value) ->
     simple_cache_server:sync_set(Key, Value).
 
--spec set(any(), any(), expire()) -> 'ok' | {'error','invalid_expire',_}.
+-spec set(any(), any(), expire()) -> 'ok' | {'error','invalid_expire', any()}.
 set(Key, _Value, 0) ->
     simple_cache_server:flush(Key);
 set(Key, Value, Expires) when is_number(Expires) ->
@@ -50,7 +50,7 @@ sync_set(Key, Value, Expires) when is_number(Expires) ->
 sync_set(_Key, _Value, Expires) ->
     {error, invalid_expire, Expires}.
 
--spec lookup(any()) -> {'error','not_found'} | {'ok',_}.
+-spec lookup(any()) -> {'error','not_found'} | {'ok', any()}.
 lookup(Key) ->
     simple_cache_server:lookup(Key).
 
@@ -66,10 +66,10 @@ flush(Key) ->
 flush() ->
     simple_cache_server:flush().
 
--spec start() -> 'ok' | {'error',_}.
+-spec start() -> 'ok' | {'error', term()}.
 start() ->
     application:start(simple_cache).
 
--spec stop() -> 'ok' | {'error',_}.
+-spec stop() -> 'ok' | {'error', term()}.
 stop() ->
     application:stop(simple_cache).

@@ -8,7 +8,7 @@
 %%=============================================================================
 %% Application callbacks
 %%=============================================================================
--spec start(any(), term()) -> {'error',_} | {'ok',pid()}.
+-spec start(any(), term()) -> {'error', term()} | {'ok', pid()}.
 start(_StartType, _StartArgs) ->
     simple_cache_sup:start_link().
 

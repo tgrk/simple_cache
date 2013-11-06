@@ -36,7 +36,7 @@
 %%=============================================================================
 %% API Function Definitions
 %%=============================================================================
--spec start_link() -> 'ignore' | {'error',_} | {'ok',pid()}.
+-spec start_link() -> 'ignore' | {'error', term()} | {'ok', pid()}.
 start_link() ->
     gen_server:start_link({local, ?SERVER}, ?MODULE, [], []).
 
@@ -60,7 +60,7 @@ set(Key, Value, Expires) ->
 sync_set(Key, Value, Expires) ->
     gen_server:call(?SERVER, {set, Key, Value, Expires}).
 
--spec lookup(any()) -> {'error','not_found'} | {'ok',_}.
+-spec lookup(any()) -> {'error','not_found'} | {'ok', any()}.
 lookup(Key) -> get_by_key(?SERVER, Key).
 
 -spec lookup(any(), any()) -> {'ok',_}.
@@ -96,22 +96,20 @@ init([]) ->
 handle_call(info, _From,  #state{table = Table} = State) ->
     {reply, ets:info(Table), State};
 handle_call({set, Key, Value, infinity}, _From, #state{table = Table} = State) ->
-    ets:insert(Table, {Key, Value}),
+    insert(Table, Key, Value, infinity),
     {reply, ok, State};
 handle_call({set, Key, Value, Expires}, _From, #state{table = Table} = State) ->
-    ets:insert(Table, {Key, Value}),
-    erlang:send_after(1000 * Expires, ?SERVER, {expire, Key}),
+    insert(Table, Key, Value, Expires),
     {reply, ok, State};
 handle_call({flush, Key}, _From, #state{table = Table} = State) ->
     ets:delete(Table, Key),
     {reply, ok, State}.
 
 handle_cast({set, Key, Value, infinity}, #state{table = Table} = State) ->
-    ets:insert(Table, {Key, Value}),
+    insert(Table, Key, Value, infinity),
     {noreply, State};
 handle_cast({set, Key, Value, Expires}, #state{table = Table} = State) ->
-    ets:insert(Table, {Key, Value}),
-    erlang:send_after(1000 * Expires, ?SERVER, {expire, Key}),
+    insert(Table, Key, Value, Expires),
     {noreply, State};
 handle_cast({flush, Key}, #state{table = Table} = State) ->
     ets:delete(Table, Key),
@@ -133,6 +131,12 @@ code_change(_OldVsn, State, _Extra) ->
 %%=============================================================================
 %% Internal functionality
 %%=============================================================================
+insert(Table, Key, Value, infinity) ->
+    ets:insert(Table, {Key, Value});
+insert(Table, Key, Value, Expires) ->
+    ets:insert(Table, {Key, Value}),
+    erlang:send_after(1000 * Expires, ?SERVER, {expire, Key}).
+
 get_by_key(Table, Key) ->
      case ets:lookup(Table, Key) of
         [{Key, Value}] ->
