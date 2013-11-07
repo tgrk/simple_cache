@@ -15,7 +15,8 @@
 %% API Function Exports
 %%=============================================================================
 -export([start_link/0,
-         info/0,
+         ops_info/0,
+         ops_list/0,
          sync_set/2,
          set/2,
          sync_set/3,
@@ -40,9 +41,13 @@
 start_link() ->
     gen_server:start_link({local, ?SERVER}, ?MODULE, [], []).
 
--spec info() -> list().
-info() ->
-    gen_server:call(?MODULE, info).
+-spec ops_info() -> list().
+ops_info() ->
+    gen_server:call(?MODULE, ops_info).
+
+-spec ops_list() -> list().
+ops_list() ->
+    gen_server:call(?MODULE, ops_list).
 
 -spec set(any(), any()) -> 'ok'.
 set(Key, Value) ->
@@ -93,8 +98,10 @@ flush() ->
 init([]) ->
     {ok, #state{table = ets:new(?SERVER, ?ETS_OPTIONS)}}.
 
-handle_call(info, _From,  #state{table = Table} = State) ->
+handle_call(ops_info, _From,  #state{table = Table} = State) ->
     {reply, ets:info(Table), State};
+handle_call(ops_list, _From,  #state{table = Table} = State) ->
+    {reply, ets:tab2list(Table), State};
 handle_call({set, Key, Value, infinity}, _From, #state{table = Table} = State) ->
     insert(Table, Key, Value, infinity),
     {reply, ok, State};
@@ -132,14 +139,14 @@ code_change(_OldVsn, State, _Extra) ->
 %% Internal functionality
 %%=============================================================================
 insert(Table, Key, Value, infinity) ->
-    ets:insert(Table, {Key, Value});
+    ets:insert(Table, {Key, Value, infinity});
 insert(Table, Key, Value, Expires) ->
-    ets:insert(Table, {Key, Value}),
+    ets:insert(Table, {Key, Value, Expires}),
     erlang:send_after(1000 * Expires, ?SERVER, {expire, Key}).
 
 get_by_key(Table, Key) ->
      case ets:lookup(Table, Key) of
-        [{Key, Value}] ->
+        [{Key, Value, _Expires}] ->
             {ok, Value};
         [] ->
             {error, not_found}

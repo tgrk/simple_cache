@@ -17,7 +17,8 @@ simple_cache_test_() ->
          {"Expire test",             fun test_expire/0},
          {"Flush entry test",        fun test_flush/0},
          {"Flush all test",          fun test_flush_all/0},
-         {"Size info test",          fun test_size_info/0},
+         {"Info operations test",    fun test_ops_info/0},
+         {"List operations test",    fun test_ops_list/0},
          {"Sync set/lookup test",    fun test_sync_set_lookup/0},
          {"Sync set zero expire",    fun test_sync_zero_expire/0},
          {"Sync expire test",        fun test_sync_expire/0},
@@ -97,11 +98,18 @@ test_expire() ->
        simple_cache:lookup(<<"foo2">>)
       ).
 
-test_size_info() ->
-    simple_cache:sync_set(<<"foo">>, <<"bar">>),
+test_ops_info() ->
+    simple_cache:sync_set(<<"foo">>, <<"bar">>, 2),
     ?assertEqual(
        1,
-       proplists:get_value(size, simple_cache:info())
+       proplists:get_value(size, simple_cache:ops_info())
+      ).
+
+test_ops_list() ->
+    simple_cache:sync_set(<<"foo">>, <<"bar">>, 2),
+    ?assertEqual(
+       [{<<"foo">>,<<"bar">>, 2}],
+       simple_cache:ops_list()
       ).
 
 test_sync_set_lookup() ->

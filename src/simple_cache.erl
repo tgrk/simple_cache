@@ -1,7 +1,9 @@
 -module(simple_cache).
 
 %% API
--export([info/0,
+-export([ops_info/0,
+         ops_list/0,
+
          set/2,
          sync_set/2,
          set/3,
@@ -22,9 +24,13 @@
 %%%=============================================================================
 %%% API
 %%%=============================================================================
--spec info() -> list().
-info() ->
-    simple_cache_server:info().
+-spec ops_info() -> list().
+ops_info() ->
+    simple_cache_server:ops_info().
+
+-spec ops_list() -> list().
+ops_list() ->
+    simple_cache_server:ops_list().
 
 -spec set(any(), any()) -> 'ok'.
 set(Key, Value) ->
