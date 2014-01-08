@@ -21,6 +21,7 @@
          set/2,
          sync_set/3,
          set/3,
+         cond_set/4,
          lookup/1,
          lookup/2,
          flush/1,
@@ -65,6 +66,11 @@ set(Key, Value, Expires) ->
 sync_set(Key, Value, Expires) ->
     gen_server:call(?SERVER, {set, Key, Value, Expires}).
 
+-spec cond_set(any(), any(), simple_cache:conditional(),
+               simple_cache:expire()) -> {ok, boolean()}.
+cond_set(Key, Value, Conditional, Expires) ->
+    gen_server:call(?SERVER, {set, Key, Value, Conditional, Expires}).
+
 -spec lookup(any()) -> {'error','not_found'} | {'ok', any()}.
 lookup(Key) -> get_by_key(?SERVER, Key).
 
@@ -108,6 +114,13 @@ handle_call({set, Key, Value, infinity}, _From, #state{table = Table} = State) -
 handle_call({set, Key, Value, Expires}, _From, #state{table = Table} = State) ->
     insert(Table, Key, Value, Expires),
     {reply, ok, State};
+handle_call({set, Key, Value, Conditional, Expires}, _From, #state{table = Table} = State) ->
+    Test = case lookup(Key) of
+               {ok, OldValue}     -> Conditional(OldValue);
+               {error, not_found} -> true
+           end,
+    Test andalso insert(Table, Key, Value, Expires),
+    {reply, {ok, Test}, State};
 handle_call({flush, Key}, _From, #state{table = Table} = State) ->
     ets:delete(Table, Key),
     {reply, ok, State}.
