@@ -8,6 +8,7 @@
          sync_set/2,
          set/3,
          sync_set/3,
+         cond_set/4,
          lookup/1,
          lookup/2,
          flush/1,
@@ -18,8 +19,9 @@
         ]).
 
 -type expire() :: infinity | pos_integer().
+-type conditional() :: fun((any()) -> boolean()).
 
--export_type([expire/0]).
+-export_type([expire/0, conditional/0]).
 
 %%%=============================================================================
 %%% API
@@ -55,6 +57,10 @@ sync_set(Key, Value, Expires) when is_number(Expires) ->
     simple_cache_server:sync_set(Key, Value, Expires);
 sync_set(_Key, _Value, Expires) ->
     {error, invalid_expire, Expires}.
+
+-spec cond_set(any(), any(), conditional(), expire()) -> any().
+cond_set(Key, Value, Conditional, Expires) when Expires > 0 ->
+    simple_cache_server:cond_set(Key, Value, Conditional, Expires).
 
 -spec lookup(any()) -> {'error','not_found'} | {'ok', any()}.
 lookup(Key) ->

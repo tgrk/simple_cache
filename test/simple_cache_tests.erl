@@ -22,7 +22,8 @@ simple_cache_test_() ->
          {"Sync set/lookup test",    fun test_sync_set_lookup/0},
          {"Sync set zero expire",    fun test_sync_zero_expire/0},
          {"Sync expire test",        fun test_sync_expire/0},
-         {"Sync set invalid expire", fun test_sync_invalid_expire/0}
+         {"Sync set invalid expire", fun test_sync_invalid_expire/0},
+         {"Conditional set",         fun test_conditional_set/0}
         ]
     }.
 
@@ -150,6 +151,19 @@ test_sync_invalid_expire() ->
        {error, invalid_expire,foo},
        simple_cache:sync_set(<<"foo">>, <<"bar">>, foo)
       ).
+
+test_conditional_set() ->
+    ok = simple_cache:sync_set(<<"foo">>, <<"bar">>),
+    ?assertEqual({ok, <<"bar">>}, simple_cache:lookup(<<"foo">>)),
+    ?assertEqual({ok, false},
+                 simple_cache:cond_set(<<"foo">>, <<"baz">>,
+                                       fun (<<"bar">>) -> false end, infinity)),
+    ?assertEqual({ok, <<"bar">>}, simple_cache:lookup(<<"foo">>)),
+    ?assertEqual({ok, true},
+                 simple_cache:cond_set(<<"foo">>, <<"baz">>,
+                                       fun (<<"bar">>) -> true end, infinity)),
+    ?assertEqual({ok, <<"baz">>},
+                 simple_cache:lookup(<<"foo">>)).
 
 %%=============================================================================
 %% Internal functionality
