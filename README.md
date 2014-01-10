@@ -11,4 +11,5 @@ For usage refer to tests.
 Credits
 ============
 * Andrew Stanton - https://github.com/Refefer/simple_cache
-* Gustav Simonsson - https://github.com/Gustav-Simonsson
+* Gustav Simonsson - https://github.com/Gustav-Simonsson/simple_cache
+* Christian Lundgren - https://github.com/chrisavl/simple_cache
