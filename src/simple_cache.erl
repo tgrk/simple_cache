@@ -13,6 +13,7 @@
          lookup/2,
          flush/1,
          flush/0,
+         sync_flush/0,
 
          start/0,
          stop/0
@@ -77,6 +78,10 @@ flush(Key) ->
 -spec flush() -> 'ok'.
 flush() ->
     simple_cache_server:flush().
+
+-spec sync_flush() -> 'ok'.
+sync_flush() ->
+    simple_cache_server:sync_flush().
 
 -spec start() -> 'ok' | {'error', term()}.
 start() ->
