@@ -26,7 +26,8 @@
          lookup/2,
          flush/1,
          sync_flush/1,
-         flush/0
+         flush/0,
+         sync_flush/0
         ]).
 
 %%=============================================================================
@@ -98,6 +99,10 @@ flush() ->
     gen_server:cast(?SERVER, flush),
     ok.
 
+-spec sync_flush() -> 'ok'.
+sync_flush() ->
+    gen_server:call(?SERVER, flush).
+
 %%=============================================================================
 %% gen_server Function Definitions
 %%=============================================================================
@@ -123,6 +128,9 @@ handle_call({set, Key, Value, Conditional, Expires}, _From, #state{table = Table
     {reply, {ok, Test}, State};
 handle_call({flush, Key}, _From, #state{table = Table} = State) ->
     ets:delete(Table, Key),
+    {reply, ok, State};
+handle_call(flush, _From, #state{table = Table} = State) ->
+    true = ets:delete_all_objects(Table),
     {reply, ok, State}.
 
 handle_cast({set, Key, Value, infinity}, #state{table = Table} = State) ->

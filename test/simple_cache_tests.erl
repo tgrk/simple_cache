@@ -17,6 +17,7 @@ simple_cache_test_() ->
          {"Expire test",             fun test_expire/0},
          {"Flush entry test",        fun test_flush/0},
          {"Flush all test",          fun test_flush_all/0},
+         {"Sync flush all test",     fun test_sync_flush_all/0},
          {"Info operations test",    fun test_ops_info/0},
          {"List operations test",    fun test_ops_list/0},
          {"Sync set/lookup test",    fun test_sync_set_lookup/0},
@@ -84,6 +85,14 @@ test_flush_all() ->
        {error, not_found},
        simple_cache:lookup(<<"foo1">>)
       ).
+
+test_sync_flush_all() ->
+    simple_cache:sync_set(<<"foo1">>, <<"bar1">>),
+    ?assertEqual({ok, <<"bar1">>},
+                 simple_cache:lookup(<<"foo1">>)),
+    ok = simple_cache:sync_flush(),
+    ?assertEqual({error, not_found},
+                 simple_cache:lookup(<<"foo1">>)).
 
 test_expire() ->
     simple_cache:set(<<"foo1">>, <<"bar1">>, 1),
