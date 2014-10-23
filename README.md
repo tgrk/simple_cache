@@ -2,11 +2,57 @@ simple_cache
 ============
 
 Simple Memory-based Erlang cache service using ETS. It provides async and sync
-acesss API.
+acesss API (check for `sync_` prefix).
 
 Usage
 ============
-For usage refer to tests.
+
+Include it into rebar:
+```erlang
+{simple_cache, "",
+  {git, "git@github.com:tgrk/simple_cache.git", {branch, "master"}}}
+```
+
+Start OTP application:
+```erlang
+ok = application:start(simple_cache).
+```
+
+Insert/update value (optional expiration in ms):
+```erlang
+simple_cache:set(<<"foo">>, <<"bar">>),
+simple_cache:set(<<"foo">>, <<"bar">>, 5000),
+simple_cache:sync_set(<<"foo">>, <<"bar">>),
+simple_cache:sync_set(<<"foo">>, <<"bar">>, infinity),
+```
+
+Insert/update value based on predicate result:
+```erlang
+PredFun = fun (<<"bar">>) -> false end,
+{ok, false} = simple_cache:cond_set<<"foo">>, <<"baz">>, PredFun, infinity).
+```
+
+Get value by key (optional default value):
+```erlang
+{ok, <<"bar">>} = simple_cache:lookup(<<"foo">>),
+{ok, <<"bar">>} = simple_cache:lookup(<<"foo">>, <<"default">>),
+```
+
+Remove cached values all or by key:
+```erlang
+ok = simple_cache:flush().
+ok = simple_cache:sync_flush().
+ok = simple_cache:flush(<<"foo">>).
+```
+
+Operations helpers:
+```erlang
+simple_cache:ops_info().
+simple_cache:ops_list().
+```
+
+
+For more information about usage refer to tests.
 
 Credits
 ============
