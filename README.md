@@ -20,10 +20,10 @@ ok = application:start(simple_cache).
 
 Insert/update value (optional expiration in ms):
 ```erlang
-simple_cache:set(<<"foo">>, <<"bar">>),
-simple_cache:set(<<"foo">>, <<"bar">>, 5000),
-simple_cache:sync_set(<<"foo">>, <<"bar">>),
-simple_cache:sync_set(<<"foo">>, <<"bar">>, infinity),
+ok = simple_cache:set(<<"foo">>, <<"bar">>),
+ok = simple_cache:set(<<"foo">>, <<"bar">>, 5000),
+ok = simple_cache:sync_set(<<"foo">>, <<"bar">>),
+ok = simple_cache:sync_set(<<"foo">>, <<"bar">>, infinity),
 ```
 
 Insert/update value based on predicate result:
