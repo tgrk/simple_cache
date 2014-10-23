@@ -7,7 +7,7 @@ acesss API (check for `sync_` prefix).
 Usage
 ============
 
-Include it into rebar:
+Include it into `rebar.config`:
 ```erlang
 {simple_cache, "",
   {git, "git@github.com:tgrk/simple_cache.git", {branch, "master"}}}
