@@ -19,7 +19,7 @@
          stop/0
         ]).
 
--type expire() :: infinity | pos_integer().
+-type expire() :: infinity | non_neg_integer().
 -type conditional() :: fun((any()) -> boolean()).
 
 -export_type([expire/0, conditional/0]).
