@@ -18,16 +18,12 @@
          ops_info/0,
          ops_list/0,
          sync_set/2,
-         set/2,
+         set/2, set/3,
          sync_set/3,
-         set/3,
          cond_set/4,
-         lookup/1,
-         lookup/2,
-         flush/1,
-         sync_flush/1,
-         flush/0,
-         sync_flush/0
+         lookup/1, lookup/2,
+         flush/0, flush/1,
+         sync_flush/0, sync_flush/1
         ]).
 
 %%=============================================================================
@@ -39,19 +35,19 @@
 %%=============================================================================
 %% API Function Definitions
 %%=============================================================================
--spec start_link() -> 'ignore' | {'error', term()} | {'ok', pid()}.
+-spec start_link() -> ignore | {error, term()} | {ok, pid()}.
 start_link() ->
     gen_server:start_link({local, ?SERVER}, ?MODULE, [], []).
 
 -spec ops_info() -> list().
 ops_info() ->
-    gen_server:call(?MODULE, ops_info).
+    ets:info(?SERVER).
 
 -spec ops_list() -> list().
 ops_list() ->
-    gen_server:call(?MODULE, ops_list).
+    ets:tab2list(?SERVER).
 
--spec set(any(), any()) -> 'ok'.
+-spec set(any(), any()) -> ok.
 set(Key, Value) ->
     gen_server:cast(?SERVER, {set, Key, Value, infinity}).
 
@@ -59,7 +55,7 @@ set(Key, Value) ->
 sync_set(Key, Value) ->
     gen_server:call(?SERVER, {set, Key, Value, infinity}).
 
--spec set(any(), any(), simple_cache:expire()) -> 'ok'.
+-spec set(any(), any(), simple_cache:expire()) -> ok.
 set(Key, Value, Expires) ->
     gen_server:cast(?SERVER, {set, Key, Value, Expires}).
 
@@ -72,34 +68,28 @@ sync_set(Key, Value, Expires) ->
 cond_set(Key, Value, Conditional, Expires) ->
     gen_server:call(?SERVER, {set, Key, Value, Conditional, Expires}).
 
--spec lookup(any()) -> {'error','not_found'} | {'ok', any()}.
-lookup(Key) -> get_by_key(?SERVER, Key).
+-spec lookup(any()) -> {error, not_found} | {ok, any()}.
+lookup(Key) -> get_by_key(?SERVER, Key, undefined).
 
--spec lookup(any(), any()) -> {'ok',_}.
-lookup(Key, Default) ->
-    case lookup(Key) of
-        {ok, Value} ->
-            {ok, Value};
-        {error, not_found} ->
-            {ok, Default}
-    end.
+-spec lookup(any(), any()) -> {ok,_}.
+lookup(Key, Default) -> get_by_key(?SERVER, Key, Default).
 
--spec flush(any()) -> 'ok'.
+-spec flush(any()) -> ok.
 flush(Key) ->
     gen_server:cast(?SERVER, {flush, Key}),
     ok.
 
--spec sync_flush(any()) -> 'ok'.
+-spec sync_flush(any()) -> ok.
 sync_flush(Key) ->
     gen_server:call(?SERVER, {flush, Key}),
     ok.
 
--spec flush() -> 'ok'.
+-spec flush() -> ok.
 flush() ->
     gen_server:cast(?SERVER, flush),
     ok.
 
--spec sync_flush() -> 'ok'.
+-spec sync_flush() -> ok.
 sync_flush() ->
     gen_server:call(?SERVER, flush).
 
@@ -107,10 +97,9 @@ sync_flush() ->
 %% gen_server Function Definitions
 %%=============================================================================
 init([]) ->
-    {ok, #state{table = ets:new(?SERVER, ?ETS_OPTIONS)}}.
+    ?SERVER = ets:new(?SERVER, ?ETS_OPTIONS),
+    {ok, #state{table = ?SERVER}}.
 
-handle_call(ops_info, _From,  #state{table = Table} = State) ->
-    {reply, ets:info(Table), State};
 handle_call(ops_list, _From,  #state{table = Table} = State) ->
     {reply, ets:tab2list(Table), State};
 handle_call({set, Key, Value, infinity}, _From, #state{table = Table} = State) ->
@@ -165,10 +154,12 @@ insert(Table, Key, Value, Expires) ->
     ets:insert(Table, {Key, Value, Expires}),
     erlang:send_after(1000 * Expires, ?SERVER, {expire, Key}).
 
-get_by_key(Table, Key) ->
-     case ets:lookup(Table, Key) of
-        [{Key, Value, _Expires}] ->
+get_by_key(Table, Key, Default) ->
+    case {ets:lookup(Table, Key), Default} of
+        {[{Key, Value, _Expires}], _Default} ->
             {ok, Value};
-        [] ->
-            {error, not_found}
+        {[], undefined} ->
+            {error, not_found};
+        {[], Default} ->
+            {ok, Default}
     end.
