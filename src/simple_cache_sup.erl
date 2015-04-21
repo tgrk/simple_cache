@@ -6,7 +6,8 @@
 -export([start_link/0]).
 
 -export([start_server/1,
-         stop_server/1]).
+         stop_server/1,
+         servers/0]).
 
 %% Supervisor callbacks
 -export([init/1]).
@@ -38,6 +39,13 @@ start_server(ServerName) ->
 -spec stop_server(atom()) -> ok.
 stop_server(ServerName) ->
     supervisor:terminate_child(?MODULE, erlang:whereis(ServerName)).
+
+-spec servers() -> [atom()].
+servers() ->
+    lists:map(fun ({undefined, Pid, worker, [simple_cache_server]}) ->
+                      {registered_name, Name} = erlang:process_info(Pid, registered_name),
+                      Name
+              end, supervisor:which_children(?MODULE)).
 
 %%=============================================================================
 %% Supervisor callbacks

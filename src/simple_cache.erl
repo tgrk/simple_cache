@@ -5,6 +5,7 @@
 %% API
 -export([new/1,
          delete/1,
+         list/0,
          ops_info/1,
          ops_list/1,
          set/3, set/4,
@@ -13,6 +14,8 @@
          lookup/2, lookup/3,
          flush/1, flush/2,
          sync_flush/1]).
+
+-define(PREFIX, "simple_cache_").
 
 %%%=============================================================================
 %%% API
@@ -25,6 +28,12 @@ new(Name) ->
 -spec delete(cache_name()) -> ok.
 delete(Name) ->
     ok = simple_cache_sup:stop_server(name(Name)).
+
+-spec list() -> [cache_name()].
+list() ->
+    lists:map(fun (ServerName) ->
+                      erlang:list_to_existing_atom(erlang:atom_to_list(ServerName) -- ?PREFIX)
+              end, simple_cache_sup:servers()).
 
 -spec ops_info(cache_name()) -> list().
 ops_info(Name) ->
@@ -87,13 +96,11 @@ sync_flush(Name) ->
 %%%=============================================================================
 
 init_name(Name) when is_atom(Name) ->
-    erlang:list_to_atom(
-      "simple_cache_" ++ erlang:atom_to_list(Name)).
+    erlang:list_to_atom(?PREFIX ++ erlang:atom_to_list(Name)).
 
 name(Name) when is_atom(Name) ->
     try
-        erlang:list_to_existing_atom(
-          "simple_cache_" ++ erlang:atom_to_list(Name))
+        erlang:list_to_existing_atom(?PREFIX ++ erlang:atom_to_list(Name))
     catch
         error:badarg ->
             {error, cache_not_found}

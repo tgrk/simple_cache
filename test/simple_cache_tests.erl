@@ -187,6 +187,8 @@ test_multiple_caches() ->
     simple_cache:new(first),
     simple_cache:new(second),
 
+    ?assertEqual([?CACHE_NAME, first, second], simple_cache:list()),
+
     simple_cache:sync_set(first, a, 1),
     simple_cache:sync_set(second, b, 2),
 
