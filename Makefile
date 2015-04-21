@@ -40,7 +40,7 @@ $(error "Rebar not available on this system")
 endif
 
 .PHONY: all compile doc clean test dialyzer typer shell distclean pdf \
-  update-deps clean-common-test-data rebuild deps
+  update-deps rebuild deps qs qc
 
 all: deps compile dialyzer test
 
@@ -57,12 +57,18 @@ update-deps:
 	$(REBAR) compile
 
 compile:
+	$(REBAR) compile
+
+qc:
 	$(REBAR) skip_deps=true compile xref
+
+qs: qc
+	@$(ERL) $(ERLFLAGS)
 
 doc:
 	$(REBAR) skip_deps=true doc
 
-eunit: compile clean-common-test-data
+eunit: compile
 	$(REBAR) skip_deps=true eunit
 
 test: compile eunit
