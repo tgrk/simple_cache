@@ -3,21 +3,15 @@
 %% API
 -export([ops_info/0,
          ops_list/0,
-
-         set/2,
-         sync_set/2,
-         set/3,
-         sync_set/3,
+         set/2, set/3,
+         sync_set/2, sync_set/3,
          cond_set/4,
-         lookup/1,
-         lookup/2,
-         flush/1,
-         flush/0,
-         sync_flush/0,
+         lookup/1, lookup/2,
+         flush/0, flush/1,
+         sync_flush/0]).
 
-         start/0,
-         stop/0
-        ]).
+-export([start/0,
+         stop/0]).
 
 -type expire() :: infinity | non_neg_integer().
 -type conditional() :: fun((any()) -> boolean()).
