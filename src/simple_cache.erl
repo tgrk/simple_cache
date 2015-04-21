@@ -1,79 +1,111 @@
 -module(simple_cache).
 
+-include("simple_cache.hrl").
+
 %% API
--export([ops_info/0,
-         ops_list/0,
-         set/2, set/3,
-         sync_set/2, sync_set/3,
-         cond_set/4,
-         lookup/1, lookup/2,
-         flush/0, flush/1,
-         sync_flush/0]).
-
--type expire() :: infinity | non_neg_integer().
--type conditional() :: fun((any()) -> boolean()).
-
--export_type([expire/0,
-              conditional/0]).
+-export([new/1,
+         delete/1,
+         ops_info/1,
+         ops_list/1,
+         set/3, set/4,
+         sync_set/3, sync_set/4,
+         cond_set/5,
+         lookup/2, lookup/3,
+         flush/1, flush/2,
+         sync_flush/1]).
 
 %%%=============================================================================
 %%% API
 %%%=============================================================================
 
--spec ops_info() -> list().
-ops_info() ->
-    simple_cache_server:ops_info().
+-spec new(cache_name()) -> ok.
+new(Name) ->
+    ok = simple_cache_sup:start_server(init_name(Name)).
 
--spec ops_list() -> list().
-ops_list() ->
-    simple_cache_server:ops_list().
+-spec delete(cache_name()) -> ok.
+delete(Name) ->
+    ok = simple_cache_sup:stop_server(name(Name)).
 
--spec set(any(), any()) -> ok.
-set(Key, Value) ->
-    simple_cache_server:set(Key, Value).
+-spec ops_info(cache_name()) -> list().
+ops_info(Name) ->
+    call(ops_info, Name).
 
--spec sync_set(any(), any()) -> any().
-sync_set(Key, Value) ->
-    simple_cache_server:sync_set(Key, Value).
+-spec ops_list(cache_name()) -> list().
+ops_list(Name) ->
+    call(ops_list, Name).
 
--spec set(any(), any(), expire()) -> ok | {error, invalid_expire, any()}.
-set(Key, _Value, 0) ->
-    simple_cache_server:flush(Key);
-set(Key, Value, Expires) when is_number(Expires) ->
-    simple_cache_server:set(Key, Value, Expires);
-set(_Key, _Value, Expires) ->
+-spec set(cache_name(), any(), any()) -> ok.
+set(Name, Key, Value) ->
+    call(set, Name, [Key, Value]).
+
+-spec sync_set(cache_name(), any(), any()) -> any().
+sync_set(Name, Key, Value) ->
+    call(sync_set, Name, [Key, Value]).
+
+-spec set(cache_name(), any(), any(), expire()) -> ok | {error, invalid_expire, any()}.
+set(Name, Key, _Value, 0) ->
+    call(flush, Name, [Key]);
+set(Name, Key, Value, Expires) when is_number(Expires) ->
+    call(set, Name, [Key, Value, Expires]);
+set(_Name, _Key, _Value, Expires) ->
     {error, invalid_expire, Expires}.
 
--spec sync_set(any(), any(), expire()) -> any().
-sync_set(Key, _Value, 0) ->
-    simple_cache_server:sync_flush(Key);
-sync_set(Key, Value, Expires) when is_number(Expires) ->
-    simple_cache_server:sync_set(Key, Value, Expires);
-sync_set(_Key, _Value, Expires) ->
+-spec sync_set(cache_name(), any(), any(), expire()) -> any().
+sync_set(Name, Key, _Value, 0) ->
+    call(sync_flush, Name, [Key]);
+sync_set(Name, Key, Value, Expires) when is_number(Expires) ->
+    call(sync_set, Name, [Key, Value, Expires]);
+sync_set(_Name, _Key, _Value, Expires) ->
     {error, invalid_expire, Expires}.
 
--spec cond_set(any(), any(), conditional(), expire()) -> any().
-cond_set(Key, Value, Conditional, Expires) when Expires > 0 ->
-    simple_cache_server:cond_set(Key, Value, Conditional, Expires).
+-spec cond_set(cache_name(), any(), any(), conditional(), expire()) -> any().
+cond_set(Name, Key, Value, Conditional, Expires) when Expires > 0 ->
+    call(cond_set, Name, [Key, Value, Conditional, Expires]).
 
--spec lookup(any()) -> {error,not_found} | {ok, any()}.
-lookup(Key) ->
-    simple_cache_server:lookup(Key).
+-spec lookup(cache_name(), any()) -> {error,not_found} | {ok, any()}.
+lookup(Name, Key) ->
+    call(lookup, Name, [Key]).
 
--spec lookup(any(), any()) -> {ok,_}.
-lookup(Key, Default) ->
-    simple_cache_server:lookup(Key, Default).
+-spec lookup(cache_name(), any(), any()) -> {ok,_}.
+lookup(Name, Key, Default) ->
+    call(lookup, Name, [Key, Default]).
 
--spec flush(any()) -> ok.
-flush(Key) ->
-    simple_cache_server:flush(Key).
+-spec flush(cache_name(), any()) -> ok.
+flush(Name, Key) ->
+    call(flush, Name, [Key]).
 
--spec flush() -> ok.
-flush() ->
-    simple_cache_server:flush().
+-spec flush(cache_name()) -> ok.
+flush(Name) ->
+    call(flush, Name).
 
--spec sync_flush() -> ok.
-sync_flush() ->
-    simple_cache_server:sync_flush().
+-spec sync_flush(cache_name()) -> ok.
+sync_flush(Name) ->
+    call(sync_flush, Name).
 
+%%%=============================================================================
+%%% Internal functions
+%%%=============================================================================
 
+init_name(Name) when is_atom(Name) ->
+    erlang:list_to_atom(
+      "simple_cache_" ++ erlang:atom_to_list(Name)).
+
+name(Name) when is_atom(Name) ->
+    try
+        erlang:list_to_existing_atom(
+          "simple_cache_" ++ erlang:atom_to_list(Name))
+    catch
+        error:badarg ->
+            {error, cache_not_found}
+    end.
+
+call(Function, Name) ->
+    call(Function, Name, []).
+
+call(Function, Name, Args) ->
+    case name(Name) of
+        {error, cache_not_found} ->
+            {error, cache_not_found};
+        ServerName ->
+            erlang:apply(simple_cache_server, Function, [ServerName | Args])
+    end.
