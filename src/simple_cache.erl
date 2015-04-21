@@ -16,11 +16,13 @@
 -type expire() :: infinity | non_neg_integer().
 -type conditional() :: fun((any()) -> boolean()).
 
--export_type([expire/0, conditional/0]).
+-export_type([expire/0,
+              conditional/0]).
 
 %%%=============================================================================
 %%% API
 %%%=============================================================================
+
 -spec ops_info() -> list().
 ops_info() ->
     simple_cache_server:ops_info().
@@ -29,7 +31,7 @@ ops_info() ->
 ops_list() ->
     simple_cache_server:ops_list().
 
--spec set(any(), any()) -> 'ok'.
+-spec set(any(), any()) -> ok.
 set(Key, Value) ->
     simple_cache_server:set(Key, Value).
 
@@ -37,7 +39,7 @@ set(Key, Value) ->
 sync_set(Key, Value) ->
     simple_cache_server:sync_set(Key, Value).
 
--spec set(any(), any(), expire()) -> 'ok' | {'error','invalid_expire', any()}.
+-spec set(any(), any(), expire()) -> ok | {error, invalid_expire, any()}.
 set(Key, _Value, 0) ->
     simple_cache_server:flush(Key);
 set(Key, Value, Expires) when is_number(Expires) ->
@@ -57,23 +59,23 @@ sync_set(_Key, _Value, Expires) ->
 cond_set(Key, Value, Conditional, Expires) when Expires > 0 ->
     simple_cache_server:cond_set(Key, Value, Conditional, Expires).
 
--spec lookup(any()) -> {'error','not_found'} | {'ok', any()}.
+-spec lookup(any()) -> {error,not_found} | {ok, any()}.
 lookup(Key) ->
     simple_cache_server:lookup(Key).
 
--spec lookup(any(), any()) -> {'ok',_}.
+-spec lookup(any(), any()) -> {ok,_}.
 lookup(Key, Default) ->
     simple_cache_server:lookup(Key, Default).
 
--spec flush(any()) -> 'ok'.
+-spec flush(any()) -> ok.
 flush(Key) ->
     simple_cache_server:flush(Key).
 
--spec flush() -> 'ok'.
+-spec flush() -> ok.
 flush() ->
     simple_cache_server:flush().
 
--spec sync_flush() -> 'ok'.
+-spec sync_flush() -> ok.
 sync_flush() ->
     simple_cache_server:sync_flush().
 
