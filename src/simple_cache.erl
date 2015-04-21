@@ -10,9 +10,6 @@
          flush/0, flush/1,
          sync_flush/0]).
 
--export([start/0,
-         stop/0]).
-
 -type expire() :: infinity | non_neg_integer().
 -type conditional() :: fun((any()) -> boolean()).
 
@@ -79,10 +76,4 @@ flush() ->
 sync_flush() ->
     simple_cache_server:sync_flush().
 
--spec start() -> 'ok' | {'error', term()}.
-start() ->
-    application:start(simple_cache).
 
--spec stop() -> 'ok' | {'error', term()}.
-stop() ->
-    application:stop(simple_cache).
