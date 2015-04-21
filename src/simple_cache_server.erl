@@ -103,10 +103,10 @@ init([]) ->
 handle_call(ops_list, _From,  #state{table = Table} = State) ->
     {reply, ets:tab2list(Table), State};
 handle_call({set, Key, Value, infinity}, _From, #state{table = Table} = State) ->
-    insert(Table, Key, Value, infinity),
+    true = insert(Table, Key, Value, infinity),
     {reply, ok, State};
 handle_call({set, Key, Value, Expires}, _From, #state{table = Table} = State) ->
-    insert(Table, Key, Value, Expires),
+    _Ref = insert(Table, Key, Value, Expires),
     {reply, ok, State};
 handle_call({set, Key, Value, Conditional, Expires}, _From, #state{table = Table} = State) ->
     Test = case lookup(Key) of
@@ -123,10 +123,10 @@ handle_call(flush, _From, #state{table = Table} = State) ->
     {reply, ok, State}.
 
 handle_cast({set, Key, Value, infinity}, #state{table = Table} = State) ->
-    insert(Table, Key, Value, infinity),
+    true = insert(Table, Key, Value, infinity),
     {noreply, State};
 handle_cast({set, Key, Value, Expires}, #state{table = Table} = State) ->
-    insert(Table, Key, Value, Expires),
+    _Ref = insert(Table, Key, Value, Expires),
     {noreply, State};
 handle_cast({flush, Key}, #state{table = Table} = State) ->
     ets:delete(Table, Key),
@@ -148,11 +148,12 @@ code_change(_OldVsn, State, _Extra) ->
 %%=============================================================================
 %% Internal functionality
 %%=============================================================================
+
 insert(Table, Key, Value, infinity) ->
-    ets:insert(Table, {Key, Value, infinity});
+    true = ets:insert(Table, {Key, Value, infinity});
 insert(Table, Key, Value, Expires) ->
-    ets:insert(Table, {Key, Value, Expires}),
-    erlang:send_after(1000 * Expires, ?SERVER, {expire, Key}).
+    true = ets:insert(Table, {Key, Value, Expires}),
+    _Ref = erlang:send_after(1000 * Expires, ?SERVER, {expire, Key}).
 
 get_by_key(Table, Key, Default) ->
     case {ets:lookup(Table, Key), Default} of
