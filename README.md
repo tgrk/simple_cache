@@ -3,7 +3,7 @@ simple_cache
 
 Simple Memory-based Erlang cache service using ETS.
 
-This is a second fork of library originally written by [Andrew Stanton](https://github.com/Refefer andy@nobugs.org).
+This is a second fork of library originally written by [Andrew Stanton](https://github.com/Refefer).
 
 This particular version has a few features:
 * provides async and sync acesss API (check for `sync_` prefix).
