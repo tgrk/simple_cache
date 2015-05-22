@@ -1,8 +1,18 @@
 simple_cache
 ============
 
-Simple Memory-based Erlang cache service using ETS. It provides async and sync
-acesss API (check for `sync_` prefix).
+Simple Memory-based Erlang cache service using ETS.
+
+This is a second fork of library originally written by [Andrew Stanton](https://github.com/Refefer andy@nobugs.org).
+
+This particular version has a few features:
+* provides async and sync acesss API (check for `sync_` prefix).
+* API documentation
+* type specs
+* unit tests
+* ops helpers (check for `ops_` prefix)
+* conditional sets (credit to Christian Lundgren)
+* 
 
 Usage
 ============
@@ -57,5 +67,6 @@ For more information about usage refer to tests.
 Credits
 ============
 * Andrew Stanton - https://github.com/Refefer/simple_cache
+* Sergio Veiga - https://github.com/darkua/simle_cache
 * Gustav Simonsson - https://github.com/Gustav-Simonsson/simple_cache
 * Christian Lundgren - https://github.com/chrisavl/simple_cache
