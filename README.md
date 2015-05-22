@@ -12,7 +12,7 @@ This particular version has a few features:
 * unit tests
 * ops helpers (check for `ops_` prefix)
 * conditional sets (credit to Christian Lundgren)
-* 
+
 
 Usage
 ============
