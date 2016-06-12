@@ -9,12 +9,13 @@
                       protected
                      ]).
 
--record(state, {table}).
+-record(state, {table, options}).
 
 %%=============================================================================
 %% API Function Exports
 %%=============================================================================
 -export([start_link/0,
+         start_link/1,
          ops_info/0,
          ops_list/0,
          sync_set/2,
@@ -42,6 +43,11 @@
 -spec start_link() -> 'ignore' | {'error', term()} | {'ok', pid()}.
 start_link() ->
     gen_server:start_link({local, ?SERVER}, ?MODULE, [], []).
+
+-spec start_link(list({atom(), any()}))
+                -> 'ignore' | {'error', term()} | {'ok', pid()}.
+start_link(CustomOptions) ->
+    gen_server:start_link({local, ?SERVER}, ?MODULE, [CustomOptions], []).
 
 -spec ops_info() -> list().
 ops_info() ->
@@ -107,7 +113,12 @@ sync_flush() ->
 %% gen_server Function Definitions
 %%=============================================================================
 init([]) ->
-    {ok, #state{table = ets:new(?SERVER, ?ETS_OPTIONS)}}.
+    {ok, #state{table = ets:new(?SERVER, ?ETS_OPTIONS),
+                options = ?ETS_OPTIONS}};
+init(CustomOptions) ->
+    Options = merge_options(?ETS_OPTIONS, CustomOptions),
+    {ok, #state{table = ets:new(?SERVER, Options),
+                options = Options}}.
 
 handle_call(ops_info, _From,  #state{table = Table} = State) ->
     {reply, ets:info(Table), State};
@@ -172,3 +183,8 @@ get_by_key(Table, Key) ->
         [] ->
             {error, not_found}
     end.
+
+merge_options(ExistingOptions, NewOptions) ->
+    orddict:merge(fun (_, X, Y) -> X + Y end,
+                  orddict:from_list(ExistingOptions),
+                  orddict:from_list(NewOptions)).
