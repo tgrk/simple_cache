@@ -17,10 +17,14 @@ This particular version has a few features:
 Usage
 ============
 
+Include it into `rebar.config` for rebar3:
+```erlang
+{simple_cache, "1.1"}
+```
 Include it into `rebar.config`:
 ```erlang
 {simple_cache, "",
-  {git, "git@github.com:tgrk/simple_cache.git", {branch, "master"}}}
+  {git, "git@github.com:tgrk/simple_cache.git", {tag, "1.1"}}}
 ```
 
 Start OTP application:
