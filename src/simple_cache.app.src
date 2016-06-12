@@ -1,12 +1,15 @@
 {application, simple_cache,
  [
   {description, "Simple memory cache with expiration."},
-  {vsn, git},
+  {vsn, "1.1"},
   {registered, []},
-  {applications, [
-                  kernel,
+  {applications, [kernel,
                   stdlib
                  ]},
-  {mod, { simple_cache_app, []}},
-  {env, []}
- ]}.
+  {mod, {simple_cache_app, []}},
+  {env, []},
+  {maintainers, ["Martin Wiso"]},
+  {licenses, ["MIT"]},
+  {links, [{"Github", "https://github.com/tgrk/simple_cache"}]}
+ ]
+}.
