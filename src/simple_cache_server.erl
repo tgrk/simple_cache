@@ -9,7 +9,8 @@
                       protected
                      ]).
 
--record(state, {table, options}).
+-record(state, {table   :: ets:tid() | atom(),
+                options :: list()}).
 
 %%=============================================================================
 %% API Function Exports
