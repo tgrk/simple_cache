@@ -19,17 +19,17 @@ Usage
 
 Include it into `rebar.config` for rebar3:
 ```erlang
-{simple_cache, "1.1"}
+{simple_cache, "1.1.2"}
 ```
 Include it into `rebar.config`:
 ```erlang
 {simple_cache, "",
-  {git, "git@github.com:tgrk/simple_cache.git", {tag, "1.1"}}}
+  {git, "git@github.com:tgrk/simple_cache.git", {tag, "1.1.2"}}}
 ```
 
 Start OTP application:
 ```erlang
-ok = application:start(simple_cache).
+_ = application:ensure_all_started(simple_cache).
 ```
 
 Insert/update value (optional expiration in ms):

@@ -1,14 +1,14 @@
 {application, simple_cache,
- [{description, "Simple memory cache with expiration."},
-  {vsn, "1.1.2"},
-  {registered, []},
-  {applications, [kernel,
-                  stdlib
-                 ]},
-  {mod,{simple_cache_app, []}},
-  {env,[]},
-  {maintainers,["Martin Wiso"]},
-  {licenses,["MIT"]},
-  {links,[{"Github", "https://github.com/tgrk/simple_cache"}]}
- ]
+   [{description, "Simple memory cache with expiration."},
+    {vsn, "1.1.2"},
+    {registered, []},
+    {applications, [kernel,
+                    stdlib
+                   ]},
+    {mod,{simple_cache_app, []}},
+    {env,[]},
+    {maintainers,["Martin Wiso"]},
+    {licenses,["MIT"]},
+    {links,[{"Github", "https://github.com/tgrk/simple_cache"}]}
+   ]
 }.
