@@ -6,5 +6,4 @@ priv
 *.beam
 *.plt
 _build/
-rebar.lock
 TEST-file_/
