@@ -1,6 +1,6 @@
 {application, simple_cache,
    [{description, "Simple memory cache with expiration."},
-    {vsn, "1.1.3"},
+    {vsn, "1.2.0"},
     {registered, []},
     {applications, [kernel,
                     stdlib
