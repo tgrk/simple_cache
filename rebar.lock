@@ -1,6 +1,8 @@
 {"1.1.0",
-[{<<"eunit_formatters">>,{pkg,<<"eunit_formatters">>,<<"0.5.0">>},0}]}.
+[{<<"covertool">>,{pkg,<<"covertool">>,<<"2.0.0">>},0},
+ {<<"eunit_formatters">>,{pkg,<<"eunit_formatters">>,<<"0.5.0">>},0}]}.
 [
 {pkg_hash,[
+ {<<"covertool">>, <<"2E0172F35D95AA573F113970E077FBA644DD809F450C27E88C173CA3A66FDB42">>},
  {<<"eunit_formatters">>, <<"6A9133943D36A465D804C1C5B6E6839030434B8879C5600D7DDB5B3BAD4CCB59">>}]}
 ].
